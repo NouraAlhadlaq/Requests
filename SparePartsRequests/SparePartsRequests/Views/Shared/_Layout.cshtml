@@ -1,4 +1,5 @@
-﻿<!DOCTYPE html>
+﻿
+<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8" />
@@ -20,13 +21,21 @@
                 @Html.ActionLink("Spare Parts Application", "Index", "Requests", new { area = "" }, new { @class = "navbar-brand" })
             </div>
             <div class="navbar-collapse collapse">
+              
                 <ul class="nav navbar-nav">
-                    <li>@Html.ActionLink("All Requests", "Index", "Requests")</li>
+
+                    @if (User.IsInRole("manager"))
+
+                    {
+                        <li>@Html.ActionLink("All Requests", "AllRequests", "Requests")</li>
+                        <li>@Html.ActionLink("Cancelled Requests", "CancelledRequests", "Requests")</li>
+                        <li>@Html.ActionLink("Roles", "Index", "Role")</li>
+                    }
+                    <li>@Html.ActionLink("My Requests", "Index", "Requests")</li>
                     <li>@Html.ActionLink("Create Request", "create", "Requests")</li>
-                    <li>@Html.ActionLink("Cancelled Requests", "CancelledRequests", "Requests")</li>
-                    <li>@Html.ActionLink("Roles", "Index", "Role")</li>
 
                 </ul>
+                
                 @Html.Partial("_LoginPartial")
             </div>
         </div>

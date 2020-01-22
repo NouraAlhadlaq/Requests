@@ -1,10 +1,10 @@
 ﻿@model IEnumerable<SparePartsRequests.Models.Request>
 
 @{
-    ViewBag.Title = "Index";
+    ViewBag.Title = "AllRequests";
 }
 
-<h2>Requests</h2>
+<h2>All Requests</h2>
 
 <p>
     @Html.ActionLink("Create New", "Create")
@@ -12,10 +12,10 @@
 <table class="table">
     <tr>
         <th>
-            Type
+            User
         </th>
         <th>
-            User
+            Type
         </th>
         <th>
             @Html.DisplayNameFor(model => model.Title)
@@ -23,27 +23,18 @@
         <th>
             @Html.DisplayNameFor(model => model.Desc)
         </th>
-
         <th>
-            Cancel
+            Status
         </th>
-        <th>
-            Approved
-        </th>
-        <th>
-            Links
-        </th>  
     </tr>
-    
 
-    @foreach (var item in Model)
-    {
+@foreach (var item in Model) {
 <tr>
     <td>
-        @Html.DisplayFor(modelItem => item.RequestType.Name)
+        @Html.DisplayFor(modelItem => item.ApplicationUser.Email)
     </td>
     <td>
-        @Html.DisplayFor(modelItem => item.ApplicationUser.Email)
+        @Html.DisplayFor(modelItem => item.RequestType.Name)
     </td>
     <td>
         @Html.DisplayFor(modelItem => item.Title)
@@ -52,11 +43,9 @@
         @Html.DisplayFor(modelItem => item.Desc)
     </td>
     <td>
-        @Html.DisplayFor(modelItem => item.IsCanceled)
-    </td>
-    <td>
         @if (item.IsApproved)
         {
+            @*@Html.DisplayFor(modelItem => item.IsApproved)*@
             @Html.Raw("Approved")
         }
         else if (item.IsRejected)
@@ -71,11 +60,11 @@
         }
 
     </td>
-
     <td>
-        @Html.ActionLink("Edit", "Edit", new { id = item.RequestId })
+        @Html.ActionLink("Approve", "RequestApproval", new { id = item.RequestId }) |
+        @Html.ActionLink("Delete", "Delete", new { id = item.RequestId })
     </td>
 </tr>
-    }
+}
 
 </table>

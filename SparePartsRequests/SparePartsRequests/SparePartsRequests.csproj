@@ -273,6 +273,8 @@
     <Content Include="Views\Role\Create.cshtml" />
     <Content Include="Views\Role\AssignRoleToUser.cshtml" />
     <Content Include="Views\Requests\CancelledRequests.cshtml" />
+    <Content Include="Views\Requests\RequestApproval.cshtml" />
+    <Content Include="Views\Requests\AllRequests.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

@@ -44,10 +44,10 @@
                 @Html.DisplayFor(modelItem => item.Desc)
             </td>
             <td>
-                @Html.CheckBoxFor(modelItem => item.IsCanceled)
+                @Html.DisplayFor(modelItem => item.IsCanceled)
             </td>
             <td>
-                @Html.ActionLink("Edit", "Edit", new { id = item.RequestId })
+                @Html.ActionLink("Delete", "Delete", new { id = item.RequestId })
             </td>
         </tr>
     }

@@ -20,7 +20,7 @@ namespace SparePartsRequests.Controllers
 
             var requests = db.Requests.Include(r => r.RequestType);
             var userId = User.Identity.GetUserId();
-
+            
             if (!string.IsNullOrEmpty(userId))
             {
                 requests = db.Requests.Where(x => x.ApplicationUserID == userId);
@@ -29,6 +29,13 @@ namespace SparePartsRequests.Controllers
             return View(await requests.ToListAsync());
         }
 
+        public async Task<ActionResult> AllRequests()
+        {
+
+            var requests = db.Requests.Include(r => r.RequestType);
+            requests = db.Requests.Where(x => x.IsCanceled== false );
+            return View(await requests.ToListAsync());
+        }
         // GET: Requests/Details/5
         public async Task<ActionResult> Details(long? id)
         {
@@ -45,7 +52,7 @@ namespace SparePartsRequests.Controllers
         }
 
         // GET: Requests/Create
-        [Authorize(Roles = "admin")]
+        
         public ActionResult Create()
         {
             ViewBag.RequestTypeId = new SelectList(db.RequestTypes, "RequestTypeId", "Name");
@@ -107,7 +114,42 @@ namespace SparePartsRequests.Controllers
             ViewBag.RequestTypeId = new SelectList(db.RequestTypes, "RequestTypeId", "Name", request.RequestTypeId);
             return View(request);
         }
+        [Authorize (Roles ="manager")]
+        public async Task<ActionResult> RequestApproval(long? id)
+        {
+            if (id == null)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
 
+            Request request = await db.Requests.FindAsync(id);
+            if (request == null)
+            {
+                return HttpNotFound();
+            }
+
+            ViewBag.RequestTypeId = new SelectList(db.RequestTypes, "RequestTypeId", "Name", request.RequestTypeId);
+            return View(request);
+        }
+
+        // POST: Requests/Edit/5
+        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
+        // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> RequestApproval([Bind(Include = "RequestId,Title,Desc,RequestTypeId,IsApproved,IsRejected,IsCanceled,ApplicationUserId")] Request request)
+        {
+            if (ModelState.IsValid)
+            {
+                //request.ApplicationUserID = User.Identity.GetUserId();
+
+                db.Entry(request).State = EntityState.Modified;
+                await db.SaveChangesAsync();
+                return RedirectToAction("AllRequests");
+            }
+            ViewBag.RequestTypeId = new SelectList(db.RequestTypes, "RequestTypeId", "Name", request.RequestTypeId);
+            return View(request);
+        }
         // GET: Requests/Delete/5
         public async Task<ActionResult> Delete(long? id)
         {
@@ -143,14 +185,12 @@ namespace SparePartsRequests.Controllers
             base.Dispose(disposing);
         }
 
+        [Authorize (Roles = "manager")]
         public async Task<ActionResult> CancelledRequests()
-        {
-
+        { 
             var requests = db.Requests.Include(r => r.RequestType);
-            
-                requests = db.Requests.Where(x => x.IsCanceled == true);
-            
-
+            requests = db.Requests.Where(x => x.IsCanceled == true);
+     
             return View(await requests.ToListAsync());
         }
     }
