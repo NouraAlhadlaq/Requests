@@ -1,14 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Microsoft.AspNet.Identity;
+using SparePartsRequests.Models;
 using System.Data;
 using System.Data.Entity;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Net;
-using System.Web;
+using System.Threading.Tasks;
 using System.Web.Mvc;
-using SparePartsRequests.Models;
-using Microsoft.AspNet.Identity;
 
 namespace SparePartsRequests.Controllers
 {
@@ -16,6 +13,7 @@ namespace SparePartsRequests.Controllers
     {
         private ApplicationDbContext db = new ApplicationDbContext();
 
+        [Authorize]
         // GET: Requests
         public async Task<ActionResult> Index()
         {
@@ -47,7 +45,7 @@ namespace SparePartsRequests.Controllers
         }
 
         // GET: Requests/Create
-       [Authorize]
+        [Authorize(Roles = "admin")]
         public ActionResult Create()
         {
             ViewBag.RequestTypeId = new SelectList(db.RequestTypes, "RequestTypeId", "Name");
@@ -143,6 +141,17 @@ namespace SparePartsRequests.Controllers
                 db.Dispose();
             }
             base.Dispose(disposing);
+        }
+
+        public async Task<ActionResult> CancelledRequests()
+        {
+
+            var requests = db.Requests.Include(r => r.RequestType);
+            
+                requests = db.Requests.Where(x => x.IsCanceled == true);
+            
+
+            return View(await requests.ToListAsync());
         }
     }
 }

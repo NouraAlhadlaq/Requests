@@ -5,6 +5,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
+using System.Web.Security;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin.Security;
@@ -17,9 +18,11 @@ namespace SparePartsRequests.Controllers
     {
         private ApplicationSignInManager _signInManager;
         private ApplicationUserManager _userManager;
+        private ApplicationDbContext context;
 
         public AccountController()
         {
+            context = new ApplicationDbContext();
         }
 
         public AccountController(ApplicationUserManager userManager, ApplicationSignInManager signInManager )
@@ -40,6 +43,14 @@ namespace SparePartsRequests.Controllers
             }
         }
 
+        //public async Task<ActionResult> Roles()
+        //{
+        //    var userName = User.Identity.Name;
+        //    var user = await UserManager.FindByEmailAsync(userName);
+
+        //    await UserManager.AddToRoleAsync(user.Id, "manager");
+        //    return View(Roles);
+        //}
         public ApplicationUserManager UserManager
         {
             get
@@ -387,6 +398,30 @@ namespace SparePartsRequests.Controllers
             return View(model);
         }
 
+        [AllowAnonymous]
+        [HttpGet]
+        public ActionResult RegisterRole()
+        {
+            ViewBag.Name = new SelectList(context.Roles.ToList(), "Name", "Name");
+            ViewBag.UserName = new SelectList(context.Users.ToList(), "UserName", "UserName");
+
+            return View();
+        }
+
+        [AllowAnonymous]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> RegisterRole(RegisterViewModel model, ApplicationUser user)
+        {
+            var userId = context.Users.Where(i => i.UserName == user.UserName).Select(s => s.Id);
+            string updateId = "";
+            foreach (var i in userId)
+            {
+                updateId = i.ToString();
+            }
+            await this.UserManager.AddToRoleAsync(updateId, model.Name);
+            return RedirectToAction("Index", "Home");
+        }
         //
         // POST: /Account/LogOff
         [HttpPost]
