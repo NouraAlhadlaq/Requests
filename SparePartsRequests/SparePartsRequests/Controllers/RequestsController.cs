@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNet.Identity;
 using SparePartsRequests.Models;
+using SparePartsRequests.ViewModels;
 using System.Data;
 using System.Data.Entity;
 using System.Linq;
@@ -23,7 +24,7 @@ namespace SparePartsRequests.Controllers
             
             if (!string.IsNullOrEmpty(userId))
             {
-                requests = db.Requests.Where(x => x.ApplicationUserID == userId);
+                requests = db.Requests.Where(x => x.ApplicationUserID == userId && x.IsCanceled == false);
             }
 
             return View(await requests.ToListAsync());
@@ -52,7 +53,7 @@ namespace SparePartsRequests.Controllers
         }
 
         // GET: Requests/Create
-        
+        [Authorize]
         public ActionResult Create()
         {
             ViewBag.RequestTypeId = new SelectList(db.RequestTypes, "RequestTypeId", "Name");
@@ -121,35 +122,50 @@ namespace SparePartsRequests.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
+            var ApproveRequest = await db.Requests.FindAsync(id);
 
-            Request request = await db.Requests.FindAsync(id);
-            if (request == null)
+            if (ApproveRequest == null)
             {
                 return HttpNotFound();
             }
 
-            ViewBag.RequestTypeId = new SelectList(db.RequestTypes, "RequestTypeId", "Name", request.RequestTypeId);
-            return View(request);
+            ApproveRequest.IsApproved = true;
+
+            db.Entry(ApproveRequest).State = EntityState.Modified;
+            await db.SaveChangesAsync();
+            return RedirectToAction("AllRequests");
+
+
+            var ApproveRequestVM = new RequestApprovalViewModel();
+            ApproveRequestVM.RequestId = ApproveRequest.RequestId;
+            ApproveRequestVM.Desc = ApproveRequest.Desc;
+           
+
+            
+   
+
+           // ViewBag.RequestTypeId = new SelectList(db.RequestTypes, "RequestTypeId", "Name", ApproveRequest.RequestTypeId);
+            return View(ApproveRequestVM);
         }
 
-        // POST: Requests/Edit/5
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
-        // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
+     
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> RequestApproval([Bind(Include = "RequestId,Title,Desc,RequestTypeId,IsApproved,IsRejected,IsCanceled,ApplicationUserId")] Request request)
+        public async Task<ActionResult> RequestApproval([Bind(Include = "RequestId,Desc")] RequestApprovalViewModel requestVM)
         {
             if (ModelState.IsValid)
             {
-                //request.ApplicationUserID = User.Identity.GetUserId();
-
+                var request = await db.Requests.FindAsync(requestVM.RequestId);
+                request.IsApproved = true;
+                //request.Desc = requestVM.Desc;
                 db.Entry(request).State = EntityState.Modified;
                 await db.SaveChangesAsync();
                 return RedirectToAction("AllRequests");
             }
-            ViewBag.RequestTypeId = new SelectList(db.RequestTypes, "RequestTypeId", "Name", request.RequestTypeId);
-            return View(request);
+            //ViewBag.RequestTypeId = new SelectList(db.RequestTypes, "RequestTypeId", "Name", request.RequestTypeId);
+            return View(requestVM);
         }
+        
         // GET: Requests/Delete/5
         public async Task<ActionResult> Delete(long? id)
         {
