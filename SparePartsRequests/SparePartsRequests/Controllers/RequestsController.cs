@@ -116,6 +116,46 @@ namespace SparePartsRequests.Controllers
             return View(request);
         }
         [Authorize (Roles ="manager")]
+
+        public async Task<ActionResult> Cancel(long? id)
+        {
+            if (id == null)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
+            var CancelRequest = await db.Requests.FindAsync(id);
+
+            if (CancelRequest == null)
+            {
+                return HttpNotFound();
+            }
+
+            CancelRequest.IsCanceled = true;
+
+            db.Entry(CancelRequest).State = EntityState.Modified;
+            await db.SaveChangesAsync();
+            return RedirectToAction("Index");
+
+        }
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> Cancel([Bind(Include = "RequestId")] CancelViewModel requestVM)
+        {
+            if (ModelState.IsValid)
+            {
+                var request = await db.Requests.FindAsync(requestVM.RequestId);
+                request.IsCanceled = true;
+                
+                db.Entry(request).State = EntityState.Modified;
+                await db.SaveChangesAsync();
+                return RedirectToAction("Index");
+            }
+            //ViewBag.RequestTypeId = new SelectList(db.RequestTypes, "RequestTypeId", "Name", request.RequestTypeId);
+            return View(requestVM);
+        }
+
         public async Task<ActionResult> RequestApproval(long? id)
         {
             if (id == null)
@@ -128,7 +168,7 @@ namespace SparePartsRequests.Controllers
             {
                 return HttpNotFound();
             }
-
+            ApproveRequest.IsRejected = false;
             ApproveRequest.IsApproved = true;
 
             db.Entry(ApproveRequest).State = EntityState.Modified;
@@ -136,36 +176,65 @@ namespace SparePartsRequests.Controllers
             return RedirectToAction("AllRequests");
 
 
-            var ApproveRequestVM = new RequestApprovalViewModel();
-            ApproveRequestVM.RequestId = ApproveRequest.RequestId;
-            ApproveRequestVM.Desc = ApproveRequest.Desc;
-           
+            //var ApproveRequestVM = new RequestApprovalViewModel();
+            //ApproveRequestVM.RequestId = ApproveRequest.RequestId;
+            //ApproveRequestVM.Desc = ApproveRequest.Desc;
 
-            
-   
-
-           // ViewBag.RequestTypeId = new SelectList(db.RequestTypes, "RequestTypeId", "Name", ApproveRequest.RequestTypeId);
-            return View(ApproveRequestVM);
+            // ViewBag.RequestTypeId = new SelectList(db.RequestTypes, "RequestTypeId", "Name", ApproveRequest.RequestTypeId);
+            //return View(ApproveRequestVM);
         }
 
-     
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> RequestApproval([Bind(Include = "RequestId,Desc")] RequestApprovalViewModel requestVM)
+        public async Task<ActionResult> RequestApproval([Bind(Include = "RequestId")] RequestApprovalViewModel requestVM)
         {
             if (ModelState.IsValid)
             {
                 var request = await db.Requests.FindAsync(requestVM.RequestId);
                 request.IsApproved = true;
-                //request.Desc = requestVM.Desc;
                 db.Entry(request).State = EntityState.Modified;
                 await db.SaveChangesAsync();
                 return RedirectToAction("AllRequests");
             }
-            //ViewBag.RequestTypeId = new SelectList(db.RequestTypes, "RequestTypeId", "Name", request.RequestTypeId);
             return View(requestVM);
         }
-        
+
+        public async Task<ActionResult> Reject(long? id)
+        {
+            if (id == null)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
+            var ApproveRequest = await db.Requests.FindAsync(id);
+
+            if (ApproveRequest == null)
+            {
+                return HttpNotFound();
+            }
+            ApproveRequest.IsApproved = false;
+            ApproveRequest.IsRejected = true;
+
+            db.Entry(ApproveRequest).State = EntityState.Modified;
+            await db.SaveChangesAsync();
+            return RedirectToAction("AllRequests");
+
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> Reject([Bind(Include = "RequestId")] RequestApprovalViewModel requestVM)
+        {
+            if (ModelState.IsValid)
+            {
+                var request = await db.Requests.FindAsync(requestVM.RequestId);
+                request.IsRejected = true;
+                db.Entry(request).State = EntityState.Modified;
+                await db.SaveChangesAsync();
+                return RedirectToAction("AllRequests");
+            }
+            return View(requestVM);
+        }
+     
         // GET: Requests/Delete/5
         public async Task<ActionResult> Delete(long? id)
         {

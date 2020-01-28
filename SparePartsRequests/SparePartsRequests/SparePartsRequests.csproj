@@ -196,6 +196,7 @@
     <Compile Include="Models\Request.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Startup.cs" />
+    <Compile Include="ViewModels\CancelViewModel.cs" />
     <Compile Include="ViewModels\RequestApprovalViewModel.cs" />
   </ItemGroup>
   <ItemGroup>

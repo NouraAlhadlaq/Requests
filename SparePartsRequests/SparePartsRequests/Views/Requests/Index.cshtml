@@ -28,54 +28,52 @@
             Cancel
         </th>
         <th>
-            Approved
+            Status
         </th>
         <th>
-            Links
-        </th>  
+            Edit
+        </th>
     </tr>
-    
+
 
     @foreach (var item in Model)
     {
-<tr>
-    <td>
-        @Html.DisplayFor(modelItem => item.RequestType.Name)
-    </td>
-    <td>
-        @Html.DisplayFor(modelItem => item.ApplicationUser.Email)
-    </td>
-    <td>
-        @Html.DisplayFor(modelItem => item.Title)
-    </td>
-    <td>
-        @Html.DisplayFor(modelItem => item.Desc)
-    </td>
-    <td>
-        @Html.DisplayFor(modelItem => item.IsCanceled)
-    </td>
-    <td>
-        @if (item.IsApproved)
-        {
-            @Html.Raw("Approved")
-        }
-        else if (item.IsRejected)
-        {
-            @Html.Raw("Rejected")
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.RequestType.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.ApplicationUser.Email)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Title)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Desc)
+            </td>
+            <td>
+                @Html.ActionLink("Cancel", "Cancel", new { id = item.RequestId })
 
-        }
-        else
-        {
-            @Html.Raw("---")
+            </td>
+            <td>
+                @if (item.IsApproved)
+                {
+                    @Html.Raw("Approved")
+                }
+                else if (item.IsRejected)
+                {
+                    @Html.Raw("Rejected")
+                }
+                else
+                {
+                    @Html.Raw("---")
+                }
+              </td>
 
-        }
-
-    </td>
-
-    <td>
-        @Html.ActionLink("Edit", "Edit", new { id = item.RequestId })
-    </td>
-</tr>
+            <td>
+                @Html.ActionLink("Edit", "Edit", new { id = item.RequestId })
+            </td>
+        </tr>
     }
 
 </table>

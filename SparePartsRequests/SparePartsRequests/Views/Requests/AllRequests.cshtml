@@ -62,6 +62,7 @@
     </td>
     <td>
         @Html.ActionLink("Approve", "RequestApproval", new { id = item.RequestId }) |
+        @Html.ActionLink("Reject", "Reject", new { id = item.RequestId }) |
         @Html.ActionLink("Delete", "Delete", new { id = item.RequestId })
     </td>
 </tr>
